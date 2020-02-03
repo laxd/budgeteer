@@ -8,6 +8,31 @@ const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize('sqlite::memory:');
 
+const Account = sequelize.define('Account', {
+    id: {
+        type: DataTypes.STRING,
+        primaryKey: true
+    },
+    name: DataTypes.STRING
+}, {
+    sequelize,
+    timestamps: true
+})
+
+const Transaction = sequelize.define('Transaction', {
+    id: {
+        type: DataTypes.STRING,
+        primaryKey: true
+    },
+    vendor: DataTypes.STRING,
+    amount: DataTypes.BIGINT,
+    date: DataTypes.DATE,
+    cleared: DataTypes.BOOLEAN,
+    reconciled: DataTypes.BOOLEAN
+}, {
+    sequelize
+})
+
 const Budget = sequelize.define('Budget', {
     id: {
         type: DataTypes.STRING,
@@ -29,8 +54,13 @@ const Category = sequelize.define('Category', {
     sequelize
 })
 
-Category.hasMany(Category)
+Account.hasMany(Transaction)
+Transaction.belongsTo(Account)
 
+Category.hasMany(Category, {
+    foreignKey: 'parentCategory'
+})
+Category.belongsTo(Category)
 sequelize.sync()
 
 var accountsRouter = require('./routes/accounts')
