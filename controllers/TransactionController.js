@@ -1,5 +1,5 @@
 const { check, query, validationResult } = require('express-validator');
-const Account = require('../models/Account');
+const Account = require('../models').sequelize.models.Account;
 
 const getUrl = function (req) {
     return req.protocol + '://' + req.get('host') + "/transactions/";
@@ -10,20 +10,19 @@ exports.validate = () => {
         check('vendor').not().isEmpty(),
         check('amount').isNumeric(),
         check('date').toDate(),
-        check('accountId').custom(val => {
-            return true;
-            // return Account.findOne({
-            //     where: {
-            //         id: val
-            //     }
-            // }) === null;
+        check('accountId', 'Account does not exist').custom(val => {
+            return Account.findOne({
+                where: {
+                    id: val
+                }
+            }) === null;
         })
     ]
 };
 
 exports.validateAccountIdPresent = () => {
     return [
-        query('accountId', 'Account not found').not().isEmpty()
+        query('accountId').not().isEmpty()
     ]
 };
 
