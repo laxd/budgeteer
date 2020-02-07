@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const { check, validationResult } = require('express-validator');
 
-router.get("/", function(req, res) {
+router.get("/", (req, res) => {
   res.app.get('models').Account.findAll()
       .then(accounts => res.json(accounts));
 });
 
-router.get("/:id", function(req, res) {
+router.get("/:id", (req, res) => {
   res.app.get('models').Account
     .findOne({
       where: {
@@ -16,7 +17,19 @@ router.get("/:id", function(req, res) {
     .then(account => res.json(account));
 });
 
-router.put("/", function(req, res) {
+router.put("/", [
+    check('name').not().isEmpty()
+        .trim()
+        .escape()
+], (req, res) => {
+
+  const errors = validationResult(req);
+
+  if(!errors.isEmpty()) {
+    return res.status(422)
+        .json({ errors: errors.array() });
+  }
+
   console.log(req.body);
   res.app.get('models').Account
     .build({ name: req.body.name })

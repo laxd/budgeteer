@@ -1,62 +1,76 @@
-const uuidv4 = require('uuid/v4');
-
-function find(budgetId) {
-  return budgets.find(b => b.id === budgetId)
-}
-
-let budgets = [{
-  id: uuidv4(),
-  budget_name: "Main Budget"
-}];
-
 const express = require("express");
 const router = express.Router();
 
 router.get("/", function(req, res) {
-  res.json(budgets)
+  res.app.get('models').Budget
+      .findAll()
+      .then(budgets => res.json(budgets));
 });
 
 router.get("/:budgetId", function(req, res) {
-  res.json(budgets.find(a => a.id === req.params.budgetId))
+  res.app.get('models').Budget
+      .findAll({
+          where: {
+            id: req.params.id
+          }
+      })
+      .then(budget => res.json(budget));
 });
 
 router.post("/", function(req, res) {
-  let budget = {
-    "id": uuidv4(),
-    "budget_name": req.query.budget_name
-  };
-
-  budgets.push(budget);
-
-  res.statusCode = 200;
-  res.send(budget)
+  res.app.get('models').Budget
+      .build({
+          name: req.body.name
+      })
+      .save()
+      .then(budget => res.json(budget));
 });
 
 router.put("/:budgetId", function(req, res) {
-  let budget = findBudget(req.params.budgetId);
-
-  if(budget === null) {
-    res.statusCode = 404;
-    res.send("Budget not found " + req.params.budgetId)
-  }
-  else {
-    budget.budget_name = req.query.budget_name
-  }
+  res.app.get('models').Budget
+      .findAll({
+          where: {
+            id: req.params.id
+          }
+      })
+      .then(budget => {
+        if(budget === null) {
+          res.statusCode = 404;
+        }
+        else {
+          budget.name = req.body.name;
+          budget.save();
+          res.statusCode = 200;
+          res.json(budget)
+        }
+      })
+      .catch(() => {
+        res.statusCode = 500;
+      });
 });
 
 router.delete("/:budgetId", function(req, res) {
-  let budget = findBudget(req.params.budgetId);
-
-  if(budget === null) {
-    res.statusCode = 404;
-    res.send("Budget not found " + req.params.budgetId)
-  }
-  else {
-    budgets.pop(budget);
-
-    res.statusCode = 200;
-    res.send(budget)
-  }
+  console.log("Delete...");
+  res.app.get('models').Budget
+      .findAll({
+          where: {
+            id: req.params.id
+          }
+      })
+      .then(budget => {
+        console.log("FOUND");
+        if(budget === null) {
+            res.statusCode = 404;
+            res.json("Budget not found");
+        }
+        else {
+          console.log("Destroying...");
+            budget.destroy();
+        }
+      })
+      .catch(() => {
+        res.statusCode = 500
+      });
 });
 
 module.exports = router;
