@@ -10,12 +10,17 @@ exports.validate = () => {
         check('vendor').not().isEmpty(),
         check('amount').isNumeric(),
         check('date').toDate(),
-        check('accountId', 'Account does not exist').custom(val => {
+        check('accountId', 'Account does  exist').custom(val => {
             return Account.findOne({
                 where: {
                     id: val
                 }
-            }) === null;
+            }).then(account => {
+                console.log(account)
+                if(!account) {
+                    return Promise.reject("Account does not exist");
+                }
+            });
         })
     ]
 };
