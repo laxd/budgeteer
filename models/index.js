@@ -1,12 +1,28 @@
-let accounts = [{
-    id: 1,
-    account_name: "Monzo"
-  }, {
-    id: 2,
-    account_name: "Nationwide Current Account"
-  }
-]
+const { Sequelize } = require('sequelize');
 
-export default {
-    accounts
-}
+const sequelize = new Sequelize('sqlite::memory:');
+
+const models = [
+    'Account',
+    'Budget',
+    'Category',
+    'Transaction'
+];
+
+models.forEach(function(model) {
+    module.exports[model] = sequelize.import(__dirname + '/' + model);
+});
+
+(function (m) {
+    m.Account.hasMany(m.Transaction);
+    m.Transaction.belongsTo(m.Account);
+
+    m.Category.hasMany(m.Category, {
+        foreignKey: 'parentCategory'
+    });
+    m.Category.belongsTo(m.Category);
+})(module.exports);
+
+sequelize.sync();
+
+module.exports.sequelize = sequelize;

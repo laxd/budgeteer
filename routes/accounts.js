@@ -1,34 +1,27 @@
-var uuidv4 = require('uuid/v4')
-
-let accounts = [{
-  id: uuidv4(),
-  account_name: "Monzo",
-  transactions: [{
-    vendor: "McDonalds",
-    amount: "0.99",
-    date: "01/02/2020",
-    cleared: false,
-    reconcilled: false
-  }]
-}, {
-  id: uuidv4(),
-  account_name: "Nationwide Current Account"
-}
-]
-
-const express = require("express")
+const express = require("express");
 const router = express.Router();
 
-router.get("/", function(req, res, next) {
-  res.json(accounts)
-})
+router.get("/", function(req, res) {
+  res.app.get('models').Account.findAll()
+      .then(accounts => res.json(accounts));
+});
 
-router.get("/:accountId", function(req, res, next) {
-  res.json(accounts.find(a => a.id == req.params.accountId))
-})
+router.get("/:id", function(req, res) {
+  res.app.get('models').Account
+    .findOne({
+      where: {
+          id: req.params.id
+      }
+    })
+    .then(account => res.json(account));
+});
 
-// router.put("/", function(req, res, next) {
-//   res.send("NYI")
-// })
+router.put("/", function(req, res) {
+  console.log(req.body);
+  res.app.get('models').Account
+    .build({ name: req.body.name })
+    .save()
+    .then(account => res.json(account))
+});
 
-module.exports = router
+module.exports = router;
