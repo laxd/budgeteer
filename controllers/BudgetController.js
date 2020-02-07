@@ -1,7 +1,7 @@
 const { check, validationResult } = require('express-validator');
 
 const getUrl = function(req) {
-    return req.protocol + '://' + req.get('host') + "/budgets";
+    return req.protocol + '://' + req.get('host') + "/budgets/";
 };
 
 exports.validate = () => {
@@ -23,7 +23,7 @@ exports.get_all_budgets = (req, res) => {
                             name: budget.name,
                             request: {
                                 method: "GET",
-                                url: getUrl(req) + "/" + budget.id
+                                url: getUrl(req) + budget.id
                             }
                         }
                     })
@@ -74,7 +74,7 @@ exports.create_budget = (req, res) => {
                     name: budget.name,
                     request: {
                         method: "GET",
-                        url: getUrl(req) + "/" + budget.id
+                        url: getUrl(req) + budget.id
                     }
                 });
         })
@@ -101,7 +101,7 @@ exports.update_budget = (req, res) => {
                         name: budget.name,
                         request: {
                             method: "GET",
-                            url: getUrl(req) + "/" + budget.id
+                            url: getUrl(req) + budget.id
                         }
                     });
             }

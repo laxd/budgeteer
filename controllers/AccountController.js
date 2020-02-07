@@ -1,7 +1,7 @@
 const { check, validationResult } = require('express-validator');
 
 const getUrl = function (req) {
-    return req.protocol + '://' + req.get('host') + "/accounts";
+    return req.protocol + '://' + req.get('host') + "/accounts/";
 };
 
 exports.validate = () => {
@@ -76,7 +76,7 @@ exports.create_account = (req, res) => {
                     name: account.name,
                     request: {
                         method: "GET",
-                        url: getUrl(req) + "/" + account.id
+                        url: getUrl(req) + account.id
                     }
                 });
         })

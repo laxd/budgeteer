@@ -3,7 +3,8 @@ const router = express.Router();
 
 const routes = [
     'accounts',
-    'budgets'
+    'budgets',
+    'transactions'
 ];
 
 routes.forEach(function (route) {

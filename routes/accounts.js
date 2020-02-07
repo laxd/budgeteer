@@ -6,7 +6,7 @@ router.get("/", AccountController.get_all_accounts);
 
 router.get("/:id", AccountController.get_account);
 
-router.put("/",
+router.post("/",
     AccountController.validate(),
     AccountController.create_account);
 
