@@ -1,4 +1,4 @@
-const { check, validationResult } = require('express-validator');
+const { check, query, validationResult } = require('express-validator');
 const Account = require('../models/Account');
 
 const getUrl = function (req) {
@@ -21,7 +21,20 @@ exports.validate = () => {
     ]
 };
 
+exports.validateAccountIdPresent = () => {
+    return [
+        query('accountId', 'Account not found').not().isEmpty()
+    ]
+};
+
 exports.get_transactions = (req, res) => {
+    const errors = validationResult(req);
+
+    if(!errors.isEmpty()) {
+        return res.status(422)
+            .json({ errors: errors.array() });
+    }
+
     res.app.get('models').Transaction
         .findAll({
             where: {
