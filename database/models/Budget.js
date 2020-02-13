@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Budget.associate = (models) => {
         Budget.hasMany(models.Account);
-    }
+    };
 
     return Budget
 };

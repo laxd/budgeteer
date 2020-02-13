@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Account.associate = function(models) {
         Account.hasMany(models.Transaction);
+        Account.belongsTo(models.Budget);
     };
 
     return Account;

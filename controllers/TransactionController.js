@@ -1,5 +1,5 @@
 const { check, query, validationResult } = require('express-validator');
-const { Transaction } = require('../database/models');
+const { Transaction, Account } = require('../database/models');
 
 function toJson(transaction, accountId) {
     return {
@@ -20,7 +20,7 @@ exports.validate = () => {
     return [
         check('vendor').not().isEmpty(),
         check('amount').isNumeric(),
-        check('date').toDate(),
+        check('date').not().isEmpty(),
         check('accountId', 'Account does not exist').custom(val => {
             return Account.findOne({
                 where: {
@@ -73,6 +73,13 @@ exports.get_transactions = (req, res) => {
 };
 
 exports.add_transaction = (req, res) => {
+    const errors = validationResult(req);
+
+    if(!errors.isEmpty()) {
+        return res.status(422)
+            .json({ errors: errors.array() });
+    }
+
     Transaction
         .build({
             vendor: req.body.vendor,
@@ -83,7 +90,7 @@ exports.add_transaction = (req, res) => {
         .save()
         .then(transaction => {
             res.status(200)
-                .json(toJson(transaction, req.query.accountId));
+                .json(toJson(transaction, req.body.accountId));
         })
         .catch(error => {
             res.status(500)

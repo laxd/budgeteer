@@ -18,20 +18,20 @@ exports.validate = () => {
 };
 
 exports.get_all_budgets = (req, res) => {
-    Budget
-        .findAll()
+    Budget.findAll()
         .then(budgets => {
             res.status(200)
                 .json({
-                    count: budgets.length,
-                    budgets: budgets.map(budget => toJson(budget))
+                    links: {
+                        self: "/budgets"
+                    },
+                    data: budgets.map(budget => toJson(budget))
                 });
         });
 };
 
 exports.get_budget = (req, res) => {
-    Budget
-        .findOne({
+    Budget.findOne({
             where: {
                 id: req.params.id
             }
@@ -39,7 +39,7 @@ exports.get_budget = (req, res) => {
         .then(budget => {
             if(budget) {
                 res.status(200)
-                    .json(budget)
+                    .json(toJson(budget))
             }
             else {
                 res.status(404)
@@ -60,20 +60,13 @@ exports.create_budget = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    Budget
-        .build({
+    Budget.build({
             name: req.body.name
         })
         .save()
         .then(budget => {
             res.status(200)
-                .json({
-                    id: budget.id,
-                    name: budget.name,
-                    link: {
-                        self: `/budgets/${budget.id}`
-                    }
-                });
+                .json(toJson(budget));
         })
         .catch(error => {
             res.status(500)
@@ -82,8 +75,7 @@ exports.create_budget = (req, res) => {
 };
 
 exports.update_budget = (req, res) => {
-    Budget
-        .findOne({
+    Budget.findOne({
             where: {
                 id: req.params.id
             }
@@ -93,13 +85,7 @@ exports.update_budget = (req, res) => {
                 budget.name = req.body.name;
                 budget.save();
                 res.status(200)
-                    .json({
-                        id: budget.id,
-                        name: budget.name,
-                        links: {
-                            self: `/budget/${budget.id}`
-                        }
-                    });
+                    .json(toJson(budget));
             }
             else {
                 res.status(404)
@@ -114,8 +100,7 @@ exports.update_budget = (req, res) => {
 };
 
 exports.delete_budget = (req, res) => {
-    Budget
-        .findOne({
+    Budget.findOne({
             where: {
                 id: req.params.id
             }

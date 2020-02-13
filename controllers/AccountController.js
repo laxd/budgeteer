@@ -1,5 +1,5 @@
 const { check, validationResult } = require('express-validator');
-const { Account } = require('../database/models');
+const { Account, Budget } = require('../database/models');
 
 function toJson(account) {
     return {
@@ -14,7 +14,22 @@ function toJson(account) {
 
 exports.validate = () => {
     return [
-        check('name').not().isEmpty()
+        check('name').not().isEmpty(),
+        check('budgetId', 'Budget does not exist').custom(val => {
+            if(!val) {
+                return Promise.reject("budgetId must be a valid budget");
+            }
+
+            return Budget.findOne({
+                where: {
+                    id: val
+                }
+            }).then(budget => {
+                if(!budget) {
+                    return Promise.reject("budgetId must be a valid budget");
+                }
+            });
+        })
     ]
 };
 
@@ -65,7 +80,10 @@ exports.create_account = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    Account.build({ name: req.body.name })
+    Account.build({
+        name: req.body.name,
+        BudgetId: req.body.budgetId
+    })
         .save()
         .then(account => {
             res.status(200)
