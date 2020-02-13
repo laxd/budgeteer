@@ -12,4 +12,8 @@ router.post("/",
     TransactionController.validate(),
     TransactionController.add_transaction);
 
+router.delete("/:id", TransactionController.delete_transaction);
+
+router.put("/:id", TransactionController.update_transaction);
+
 module.exports = router;

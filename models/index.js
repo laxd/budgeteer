@@ -1,9 +1,11 @@
 const { Sequelize } = require('sequelize');
+const config = require('config');
 
 const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './database.sqlite'
+    dialect: config.get('dbDialect'),
+    storage: config.get('dbConnectionString')
 });
+
 const models = [
     'Account',
     'Budget',

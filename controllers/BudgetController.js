@@ -1,9 +1,5 @@
 const { check, validationResult } = require('express-validator');
 
-const getUrl = function(req) {
-    return req.protocol + '://' + req.get('host') + "/budgets/";
-};
-
 exports.validate = () => {
     return [
         check("name").not().isEmpty()
@@ -21,9 +17,8 @@ exports.get_all_budgets = (req, res) => {
                         return {
                             id: budget.id,
                             name: budget.name,
-                            request: {
-                                method: "GET",
-                                url: getUrl(req) + budget.id
+                            links: {
+                                self: `/budgets/${budget.id}`
                             }
                         }
                     })
@@ -72,9 +67,8 @@ exports.create_budget = (req, res) => {
                 .json({
                     id: budget.id,
                     name: budget.name,
-                    request: {
-                        method: "GET",
-                        url: getUrl(req) + budget.id
+                    link: {
+                        self: `/budgets/${budget.id}`
                     }
                 });
         })
@@ -99,9 +93,8 @@ exports.update_budget = (req, res) => {
                     .json({
                         id: budget.id,
                         name: budget.name,
-                        request: {
-                            method: "GET",
-                            url: getUrl(req) + budget.id
+                        links: {
+                            self: `/budget/${budget.id}`
                         }
                     });
             }

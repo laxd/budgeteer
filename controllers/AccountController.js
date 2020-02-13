@@ -1,9 +1,5 @@
 const { check, validationResult } = require('express-validator');
 
-const getUrl = function (req) {
-    return req.protocol + '://' + req.get('host') + "/accounts/";
-};
-
 exports.validate = () => {
     return [
         check('name').not().isEmpty()
@@ -16,14 +12,16 @@ exports.get_all_accounts = (req, res) => {
         .then(accounts => {
             res.status(200)
                 .json({
-                    count: accounts.length,
-                    budgets: accounts.map(account => {
+                    links: {
+                        self: "/accounts"
+                    },
+                    data: accounts.map(account => {
                         return {
                             id: account.id,
                             name: account.name,
-                            request: {
-                                method: "GET",
-                                url: getUrl(req) + "/" + account.id
+                            links: {
+                                self: `/accounts/${account.id}`,
+                                transactions: `/transactions?accountId=${account.id}`
                             }
                         }
                     })
@@ -32,7 +30,7 @@ exports.get_all_accounts = (req, res) => {
         .catch(error => {
             res.status(500)
                 .json({ error: error.message });
-        });;
+        });
 };
 
 exports.get_account = (req, res) => {
@@ -45,7 +43,13 @@ exports.get_account = (req, res) => {
         .then(account => {
             if(account) {
                 res.status(200)
-                    .json(account);
+                    .json({
+                        links: {
+                            self: `/accounts/${account.id}`,
+                            transactions: `/transactions?accountId=${account.id}`
+                        },
+                        data: account
+                    });
             }
             else {
                 res.status(404)
@@ -76,7 +80,7 @@ exports.create_account = (req, res) => {
                     name: account.name,
                     request: {
                         method: "GET",
-                        url: getUrl(req) + account.id
+                        url: `/accounts/${account.id}`
                     }
                 });
         })
