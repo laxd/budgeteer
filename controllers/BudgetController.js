@@ -1,4 +1,15 @@
 const { check, validationResult } = require('express-validator');
+const { Budget } = require('../database/models');
+
+function toJson(budget) {
+    return {
+        id: budget.id,
+        name: budget.name,
+        links: {
+            self: `/budgets/${budget.id}`
+        }
+    }
+}
 
 exports.validate = () => {
     return [
@@ -7,27 +18,19 @@ exports.validate = () => {
 };
 
 exports.get_all_budgets = (req, res) => {
-    res.app.get('models').Budget
+    Budget
         .findAll()
         .then(budgets => {
             res.status(200)
                 .json({
                     count: budgets.length,
-                    budgets: budgets.map(budget => {
-                        return {
-                            id: budget.id,
-                            name: budget.name,
-                            links: {
-                                self: `/budgets/${budget.id}`
-                            }
-                        }
-                    })
+                    budgets: budgets.map(budget => toJson(budget))
                 });
         });
 };
 
 exports.get_budget = (req, res) => {
-    res.app.get('models').Budget
+    Budget
         .findOne({
             where: {
                 id: req.params.id
@@ -57,7 +60,7 @@ exports.create_budget = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    res.app.get('models').Budget
+    Budget
         .build({
             name: req.body.name
         })
@@ -79,7 +82,7 @@ exports.create_budget = (req, res) => {
 };
 
 exports.update_budget = (req, res) => {
-    res.app.get('models').Budget
+    Budget
         .findOne({
             where: {
                 id: req.params.id
@@ -111,7 +114,7 @@ exports.update_budget = (req, res) => {
 };
 
 exports.delete_budget = (req, res) => {
-    res.app.get('models').Budget
+    Budget
         .findOne({
             where: {
                 id: req.params.id

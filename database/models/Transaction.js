@@ -1,5 +1,5 @@
-module.exports = function(sequelize, DataTypes) {
-    return sequelize.define('Transaction', {
+module.exports = (sequelize, DataTypes) => {
+    const Transaction = sequelize.define('Transaction', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -29,4 +29,10 @@ module.exports = function(sequelize, DataTypes) {
             defaultValue: false
         }
     });
-};
+
+    Transaction.associate = function(models) {
+        Transaction.belongsTo(models.Account);
+    }
+
+    return Transaction;
+}

@@ -1,4 +1,16 @@
 const { check, validationResult } = require('express-validator');
+const { Account } = require('../database/models');
+
+function toJson(account) {
+    return {
+        id: account.id,
+        name: account.name,
+        links: {
+            self: `/accounts/${account.id}`,
+            transactions: `/transactions?accountId=${account.id}`
+        }
+    }
+}
 
 exports.validate = () => {
     return [
@@ -7,24 +19,14 @@ exports.validate = () => {
 };
 
 exports.get_all_accounts = (req, res) => {
-    res.app.get('models').Account
-        .findAll()
+    Account.findAll()
         .then(accounts => {
             res.status(200)
                 .json({
                     links: {
                         self: "/accounts"
                     },
-                    data: accounts.map(account => {
-                        return {
-                            id: account.id,
-                            name: account.name,
-                            links: {
-                                self: `/accounts/${account.id}`,
-                                transactions: `/transactions?accountId=${account.id}`
-                            }
-                        }
-                    })
+                    data: accounts.map(account => toJson(account))
                 });
         })
         .catch(error => {
@@ -34,8 +36,7 @@ exports.get_all_accounts = (req, res) => {
 };
 
 exports.get_account = (req, res) => {
-    res.app.get('models').Account
-        .findOne({
+    Account.findOne({
             where: {
                 id: req.params.id
             }
@@ -43,13 +44,7 @@ exports.get_account = (req, res) => {
         .then(account => {
             if(account) {
                 res.status(200)
-                    .json({
-                        links: {
-                            self: `/accounts/${account.id}`,
-                            transactions: `/transactions?accountId=${account.id}`
-                        },
-                        data: account
-                    });
+                    .json(toJson(account));
             }
             else {
                 res.status(404)
@@ -70,19 +65,11 @@ exports.create_account = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    res.app.get('models').Account
-        .build({ name: req.body.name })
+    Account.build({ name: req.body.name })
         .save()
         .then(account => {
             res.status(200)
-                .json({
-                    id: account.id,
-                    name: account.name,
-                    request: {
-                        method: "GET",
-                        url: `/accounts/${account.id}`
-                    }
-                });
+                .json(toJson(account));
         })
         .catch(error => {
             res.status(500)
