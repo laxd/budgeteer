@@ -6,10 +6,7 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true
         },
         name: DataTypes.STRING,
-        startingBalance: {
-            type: DataTypes.NUMERIC(10, 2),
-            allowNull: false
-        }
+        balance: DataTypes.VIRTUAL
     });
 
     Account.associate = function(models) {
@@ -21,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         return {
             id: account.id,
             name: account.name,
+            balance: account.balance,
             links: {
                 self: `/accounts/${account.id}`,
                 transactions: `/transactions?accountId=${account.id}`

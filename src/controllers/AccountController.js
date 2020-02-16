@@ -64,6 +64,7 @@ exports.create_account = (req, res) => {
             .json({ errors: errors.array() });
     }
 
+
     Account.build({
         name: req.body.name,
         startingBalance: req.body.startingBalance,
