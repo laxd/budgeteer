@@ -1,6 +1,6 @@
 const { check, validationResult } = require('express-validator');
-const { Account, Budget } = require('../database/models');
-const { findAccount } = require('../services/AccountService');
+const { Account, Budget } = require('../../database/models/index');
+const { findAccount } = require('../../services/AccountService');
 
 exports.validate = () => {
     return [

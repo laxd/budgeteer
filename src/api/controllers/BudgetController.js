@@ -1,5 +1,5 @@
 const { check, validationResult } = require('express-validator');
-const { Budget } = require('../database/models');
+const { Budget } = require('../../database/models/index');
 
 exports.validate = () => {
     return [
