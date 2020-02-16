@@ -5,12 +5,27 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        name: DataTypes.STRING
+        name: DataTypes.STRING,
+        startingBalance: {
+            type: DataTypes.NUMERIC(10, 2),
+            allowNull: false
+        }
     });
 
     Account.associate = function(models) {
         Account.hasMany(models.Transaction);
         Account.belongsTo(models.Budget);
+    };
+
+    Account.toJson = (account) => {
+        return {
+            id: account.id,
+            name: account.name,
+            links: {
+                self: `/accounts/${account.id}`,
+                transactions: `/transactions?accountId=${account.id}`
+            }
+        }
     };
 
     return Account;

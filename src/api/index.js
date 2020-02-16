@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use('/', require('../routes'));
+app.use('/', require('./routes/index'));
 
 app.use((req, res, next) => {
     const error = new Error('Not found');

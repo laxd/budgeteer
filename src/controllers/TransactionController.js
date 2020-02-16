@@ -1,21 +1,6 @@
 const { check, query, validationResult } = require('express-validator');
 const { Transaction, Account } = require('../database/models');
 
-function toJson(transaction, accountId) {
-    return {
-        id: transaction.id,
-        vendor: transaction.vendor,
-        date: transaction.date,
-        amount: transaction.amount,
-        cleared: transaction.cleared,
-        reconciled: transaction.reconciled,
-        links: {
-            self: `/transactions/${transaction.id}`,
-            account: `/accounts/${accountId}`
-        }
-    }
-}
-
 exports.validate = () => {
     return [
         check('vendor').not().isEmpty(),
@@ -50,8 +35,7 @@ exports.get_transactions = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    Transaction
-        .findAll({
+    Transaction.findAll({
             where: {
                 accountId: req.query.accountId
             }
@@ -59,7 +43,7 @@ exports.get_transactions = (req, res) => {
         .then(transactions => {
             if(transactions) {
                 res.status(200)
-                    .json(transactions.map(transaction => toJson(transaction, req.query.accountId)));
+                    .json(transactions.map(transaction => Transaction.toJson(transaction)));
             }
             else {
                 res.status(404)
@@ -80,8 +64,7 @@ exports.add_transaction = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    Transaction
-        .build({
+    Transaction.build({
             vendor: req.body.vendor,
             amount: req.body.amount,
             date: req.body.date,
@@ -90,7 +73,7 @@ exports.add_transaction = (req, res) => {
         .save()
         .then(transaction => {
             res.status(200)
-                .json(toJson(transaction, req.body.accountId));
+                .json(Transaction.toJson(transaction));
         })
         .catch(error => {
             res.status(500)
@@ -100,8 +83,7 @@ exports.add_transaction = (req, res) => {
 
 exports.update_transaction = (req, res) => {
     // Find the given transaction first
-    Transaction
-        .findOne({
+    Transaction.findOne({
             where: {
                 id: req.params.id
             }
@@ -116,7 +98,7 @@ exports.update_transaction = (req, res) => {
             result.save()
                 .then(transaction => {
                         res.status(200)
-                            .json(toJson(transaction, req.query.accountId));
+                            .json(Transaction.toJson(transaction));
                     })
         })
         .catch(error => {
@@ -128,8 +110,7 @@ exports.update_transaction = (req, res) => {
 
 
 exports.delete_transaction = (req, res) => {
-    Transaction
-        .findOne({
+    Transaction.findOne({
             where: {
                 id: req.params.id
             }

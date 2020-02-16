@@ -1,16 +1,6 @@
 const { check, validationResult } = require('express-validator');
 const { Account, Budget } = require('../database/models');
-
-function toJson(account) {
-    return {
-        id: account.id,
-        name: account.name,
-        links: {
-            self: `/accounts/${account.id}`,
-            transactions: `/transactions?accountId=${account.id}`
-        }
-    }
-}
+const { findAccount } = require('../services/AccountService');
 
 exports.validate = () => {
     return [
@@ -41,7 +31,7 @@ exports.get_all_accounts = (req, res) => {
                     links: {
                         self: "/accounts"
                     },
-                    data: accounts.map(account => toJson(account))
+                    data: accounts.map(account => Account.toJson(account))
                 });
         })
         .catch(error => {
@@ -51,24 +41,18 @@ exports.get_all_accounts = (req, res) => {
 };
 
 exports.get_account = (req, res) => {
-    Account.findOne({
-            where: {
-                id: req.params.id
-            }
-        })
-        .then(account => {
+    findAccount(req.params.id)
+        .then((account) => {
+            console.log(account);
+
             if(account) {
                 res.status(200)
-                    .json(toJson(account));
+                    .json(Account.toJson(account));
             }
             else {
                 res.status(404)
                     .json("Not found");
             }
-        })
-        .catch(error => {
-            res.status(500)
-                .json({ error: error.message });
         });
 };
 
@@ -82,12 +66,14 @@ exports.create_account = (req, res) => {
 
     Account.build({
         name: req.body.name,
-        BudgetId: req.body.budgetId
+        startingBalance: req.body.startingBalance,
+        BudgetId: req.body.budgetId,
+
     })
         .save()
         .then(account => {
             res.status(200)
-                .json(toJson(account));
+                .json(Account.toJson(account));
         })
         .catch(error => {
             res.status(500)

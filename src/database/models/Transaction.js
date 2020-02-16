@@ -32,7 +32,22 @@ module.exports = (sequelize, DataTypes) => {
 
     Transaction.associate = function(models) {
         Transaction.belongsTo(models.Account);
-    }
+    };
+
+    Transaction.toJson = (transaction, accountId) => {
+        return {
+            id: transaction.id,
+            vendor: transaction.vendor,
+            date: transaction.date,
+            amount: transaction.amount,
+            cleared: transaction.cleared,
+            reconciled: transaction.reconciled,
+            links: {
+                self: `/transactions/${transaction.id}`,
+                account: `/accounts/${accountId}`
+            }
+        }
+    };
 
     return Transaction;
-}
+};

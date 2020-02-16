@@ -1,16 +1,6 @@
 const { check, validationResult } = require('express-validator');
 const { Budget } = require('../database/models');
 
-function toJson(budget) {
-    return {
-        id: budget.id,
-        name: budget.name,
-        links: {
-            self: `/budgets/${budget.id}`
-        }
-    }
-}
-
 exports.validate = () => {
     return [
         check("name").not().isEmpty()
@@ -25,7 +15,7 @@ exports.get_all_budgets = (req, res) => {
                     links: {
                         self: "/budgets"
                     },
-                    data: budgets.map(budget => toJson(budget))
+                    data: budgets.map(budget => Budget.toJson(budget))
                 });
         });
 };
@@ -39,7 +29,7 @@ exports.get_budget = (req, res) => {
         .then(budget => {
             if(budget) {
                 res.status(200)
-                    .json(toJson(budget))
+                    .json(Budget.toJson(budget))
             }
             else {
                 res.status(404)
@@ -66,7 +56,7 @@ exports.create_budget = (req, res) => {
         .save()
         .then(budget => {
             res.status(200)
-                .json(toJson(budget));
+                .json(Budget.toJson(budget));
         })
         .catch(error => {
             res.status(500)
@@ -85,7 +75,7 @@ exports.update_budget = (req, res) => {
                 budget.name = req.body.name;
                 budget.save();
                 res.status(200)
-                    .json(toJson(budget));
+                    .json(Budget.toJson(budget));
             }
             else {
                 res.status(404)
