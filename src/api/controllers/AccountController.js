@@ -1,6 +1,7 @@
 const { check, validationResult } = require('express-validator');
 const { Account, Budget } = require('../../database/models/index');
-const { findAccount } = require('../../services/AccountService');
+const AccountService = require('../../services/AccountService');
+const logger = require('../../loaders/logger');
 
 exports.validate = () => {
     return [
@@ -10,11 +11,7 @@ exports.validate = () => {
                 return Promise.reject("budgetId must be a valid budget");
             }
 
-            return Budget.findOne({
-                where: {
-                    id: val
-                }
-            }).then(budget => {
+            return Budget.find(val).then(budget => {
                 if(!budget) {
                     return Promise.reject("budgetId must be a valid budget");
                 }
@@ -24,7 +21,7 @@ exports.validate = () => {
 };
 
 exports.get_all_accounts = (req, res) => {
-    Account.findAll()
+    AccountService.findAccountsForBudget(123)
         .then(accounts => {
             res.status(200)
                 .json({
@@ -33,25 +30,19 @@ exports.get_all_accounts = (req, res) => {
                     },
                     data: accounts.map(account => Account.toJson(account))
                 });
-        })
-        .catch(error => {
-            res.status(500)
-                .json({ error: error.message });
         });
 };
 
 exports.get_account = (req, res) => {
-    findAccount(req.params.id)
+    AccountService.findAccount(req.params.id)
         .then((account) => {
-            console.log(account);
-
             if(account) {
-                res.status(200)
-                    .json(Account.toJson(account));
+                res.status(200).json(Account.toJson(account));
             }
             else {
-                res.status(404)
-                    .json("Not found");
+                res.status(404).json({
+                    message: "Not found"
+                });
             }
         });
 };
@@ -64,20 +55,19 @@ exports.create_account = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-
-    Account.build({
-        name: req.body.name,
-        startingBalance: req.body.startingBalance,
-        BudgetId: req.body.budgetId,
-
-    })
-        .save()
+    AccountService.createAccount(req.body)
         .then(account => {
             res.status(200)
                 .json(Account.toJson(account));
-        })
-        .catch(error => {
-            res.status(500)
-                .json({ error: error.message });
+        });
+};
+
+exports.delete_account = (req, res, next) => {
+    AccountService.deleteAccount(req.params.id)
+        .then(() => {
+            res.status(200).json({
+                status: "Success",
+                message: "Account deleted"
+            });
         });
 };

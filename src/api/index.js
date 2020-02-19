@@ -1,7 +1,5 @@
-const createError = require('http-errors');
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
@@ -15,18 +13,19 @@ app.use(cookieParser());
 
 app.use('/', require('./routes/index'));
 
+// Anything that isn't matched above gets a 404
 app.use((req, res, next) => {
-    const error = new Error('Not found');
+    const error = new Error(`Method ${req.method} not registered at ${req.path}`);
     error.status = 404;
     next(error);
 });
 
+// Generic error handler
 app.use((error, req, res, next) => {
+    console.log(error);
     res.status(error.status || 500);
     res.json({
-        error: {
-            message: error.message
-        }
+        error: error.message
     });
 });
 

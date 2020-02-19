@@ -10,4 +10,6 @@ router.post("/",
     AccountController.validate(),
     AccountController.create_account);
 
+router.delete("/:id", AccountController.delete_account);
+
 module.exports = router;
