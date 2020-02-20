@@ -21,7 +21,7 @@ exports.validate = () => {
 };
 
 exports.get_all_accounts = (req, res) => {
-    AccountService.findAccountsForBudget(123)
+    AccountService.findAccountsForBudget(req.query.budgetId)
         .then(accounts => {
             res.status(200)
                 .json({
@@ -30,7 +30,7 @@ exports.get_all_accounts = (req, res) => {
                     },
                     data: accounts.map(account => Account.toJson(account))
                 });
-        });
+        }).catch(error => next(error))
 };
 
 exports.get_account = (req, res) => {
@@ -44,7 +44,7 @@ exports.get_account = (req, res) => {
                     message: "Not found"
                 });
             }
-        });
+        }).catch(error => next(error))
 };
 
 exports.create_account = (req, res) => {
@@ -59,7 +59,7 @@ exports.create_account = (req, res) => {
         .then(account => {
             res.status(200)
                 .json(Account.toJson(account));
-        });
+        }).catch(error => next(error))
 };
 
 exports.delete_account = (req, res, next) => {
@@ -69,5 +69,5 @@ exports.delete_account = (req, res, next) => {
                 status: "Success",
                 message: "Account deleted"
             });
-        });
+        }).catch(error => next(error))
 };

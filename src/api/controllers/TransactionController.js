@@ -1,18 +1,15 @@
 const { check, query, validationResult } = require('express-validator');
-const { Transaction, Account } = require('../../database/models/index');
+const { Transaction } = require('../../database/models/index');
+const TransactionService = require('../../services/TransactionService');
+const AccountService = require('../../services/AccountService');
 
 exports.validate = () => {
     return [
         check('vendor').not().isEmpty(),
         check('amount').isNumeric(),
-        check('date').not().isEmpty(),
+        check('date').isISO8601().toDate(),
         check('accountId', 'Account does not exist').custom(val => {
-            return Account.findOne({
-                where: {
-                    id: val
-                }
-            }).then(account => {
-                console.log(account);
+            AccountService.findAccount(val).then(account => {
                 if(!account) {
                     return Promise.reject("Account does not exist");
                 }
@@ -35,28 +32,14 @@ exports.get_transactions = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    Transaction.findAll({
-            where: {
-                accountId: req.query.accountId
-            }
-        })
+    TransactionService.findTransactions(req.query.accountId)
         .then(transactions => {
-            if(transactions) {
-                res.status(200)
-                    .json(transactions.map(transaction => Transaction.toJson(transaction)));
-            }
-            else {
-                res.status(404)
-                    .json("Not found");
-            }
-        })
-        .catch(error => {
-            res.status(500)
-                .json({ error: error.message });
-        });
+            res.status(200)
+                .json(transactions.map(transaction => Transaction.toJson(transaction)));
+        }).catch(error => next(error))
 };
 
-exports.add_transaction = (req, res) => {
+exports.add_transaction = (req, res, next) => {
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {
@@ -64,70 +47,27 @@ exports.add_transaction = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    Transaction.build({
-            vendor: req.body.vendor,
-            amount: req.body.amount,
-            date: req.body.date,
-            AccountId: req.body.accountId
-        })
-        .save()
+    TransactionService.createTransaction(req.body)
         .then(transaction => {
             res.status(200)
                 .json(Transaction.toJson(transaction));
-        })
-        .catch(error => {
-            res.status(500)
-                .json({ error: error.message });
-        });
+        }).catch(error => next(error))
 };
 
 exports.update_transaction = (req, res) => {
     // Find the given transaction first
-    Transaction.findOne({
-            where: {
-                id: req.params.id
-            }
-        }).then(result => {
-            // Only update the values that have actually changed and actually exist
-            for(let key in req.body) {
-                if(key in result) {
-                    result[key] = req.body[key];
-                }
-            }
-
-            result.save()
-                .then(transaction => {
-                        res.status(200)
-                            .json(Transaction.toJson(transaction));
-                    })
-        })
-        .catch(error => {
-            res.status(500)
-                .json({ error: error.message });
-        });
-
+    TransactionService.updateTransaction(req.params.id, req.body)
+        .then(transaction => {
+            res.status(200)
+                .json(Transaction.toJson(transaction));
+        }).catch(error => next(error))
 };
 
 
 exports.delete_transaction = (req, res) => {
-    Transaction.findOne({
-            where: {
-                id: req.params.id
-            }
-        })
-        .then(result => {
-            if(result) {
-                result.destroy();
-                res.status(200)
-                    .json({ message: "Transaction deleted" });
-            }
-            else {
-                res.status(404)
-                    .json({ message: "Not found" });
-            }
-        })
-        .catch(error => {
-            res.status(500)
-                .json({ error: error.message });
-        });
+    TransactionService.deleteTransaction(req.params.id)
+        .then(() => {
+            res.status(200)
+                .json({ message: "Transaction deleted" });
+        }).catch(error => next(error))
 };

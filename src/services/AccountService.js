@@ -1,6 +1,6 @@
 const createError = require('http-errors');
-const { sequelize } = require('../database/models');
-const { Account, Transaction } = require('../database/models');
+const {sequelize} = require('../database/models');
+const {Account, Transaction} = require('../database/models');
 const logger = require('../loaders/logger');
 
 class AccountService {
@@ -32,16 +32,21 @@ class AccountService {
             }),
             this.getCurrentBalance(id)
         ]).then(([account, balance]) => {
-            if(account) {
+            if (account) {
                 // TODO: Find a way to incorporate this into the account model
                 account.balance = balance;
             }
             return account;
-        });
+        })
     }
 
     findAccountsForBudget(id) {
-        return Account.findAll();
+        return Account.findAll({
+                where: {
+                    id: id
+                }
+            }
+        );
     }
 
     deleteAccount(id) {
@@ -51,11 +56,11 @@ class AccountService {
                 id: id
             }
         })
-        .then(account => {
-            if(account) {
-                account.destroy();
-            }
-        });
+            .then(account => {
+                if (account) {
+                    account.destroy();
+                }
+            });
     }
 
     getCurrentBalance(accountId) {

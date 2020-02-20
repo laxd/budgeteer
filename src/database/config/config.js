@@ -6,8 +6,8 @@ module.exports = {
         storage: "data.sqlite3",
     },
     test: {
-        url: "sqlite:memory",
-        dialect: "sqlite"
+        dialect: "sqlite",
+        storage: ":memory:"
     },
     production: {
         url: process.env.DB_URL,
