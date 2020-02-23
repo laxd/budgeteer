@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             id: budget.id,
             name: budget.name,
             links: {
-                self: `/budgets/${budget.id}`
+                self: `/budgets/${budget.id}`,
+                accounts: `/accounts?budgetId=${budget.id}`
             }
         }
     };

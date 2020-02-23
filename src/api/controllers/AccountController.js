@@ -1,6 +1,7 @@
 const { check, validationResult } = require('express-validator');
 const { Account, Budget } = require('../../database/models/index');
 const AccountService = require('../../services/AccountService');
+const BudgetService = require('../../services/BudgetService');
 const logger = require('../../loaders/logger');
 
 exports.validate = () => {
@@ -11,7 +12,7 @@ exports.validate = () => {
                 return Promise.reject("budgetId must be a valid budget");
             }
 
-            return Budget.find(val).then(budget => {
+            return BudgetService.findBudget(val).then(budget => {
                 if(!budget) {
                     return Promise.reject("budgetId must be a valid budget");
                 }
@@ -20,20 +21,15 @@ exports.validate = () => {
     ]
 };
 
-exports.get_all_accounts = (req, res) => {
+exports.get_all_accounts = (req, res, next) => {
     AccountService.findAccountsForBudget(req.query.budgetId)
         .then(accounts => {
             res.status(200)
-                .json({
-                    links: {
-                        self: "/accounts"
-                    },
-                    data: accounts.map(account => Account.toJson(account))
-                });
+                .json(accounts.map(account => Account.toJson(account)));
         }).catch(error => next(error))
 };
 
-exports.get_account = (req, res) => {
+exports.get_account = (req, res, next) => {
     AccountService.findAccount(req.params.id)
         .then((account) => {
             if(account) {
@@ -47,7 +43,7 @@ exports.get_account = (req, res) => {
         }).catch(error => next(error))
 };
 
-exports.create_account = (req, res) => {
+exports.create_account = (req, res, next) => {
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {

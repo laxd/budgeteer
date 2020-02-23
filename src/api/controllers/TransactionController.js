@@ -9,9 +9,11 @@ exports.validate = () => {
         check('amount').isNumeric(),
         check('date').isISO8601().toDate(),
         check('accountId', 'Account does not exist').custom(val => {
-            AccountService.findAccount(val).then(account => {
-                if(!account) {
-                    return Promise.reject("Account does not exist");
+            return AccountService.findAccount(val).then(account => {
+                console.log("Val: " + val + " account: " + account);
+                if(account === undefined) {
+                    console.log("Account does not exist!");
+                    return Promise.reject();
                 }
             });
         })
@@ -40,12 +42,15 @@ exports.get_transactions = (req, res) => {
 };
 
 exports.add_transaction = (req, res, next) => {
+    console.log("Adding transaction:" + req.body);
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {
         return res.status(422)
             .json({ errors: errors.array() });
     }
+
+    console.log("Validation passed:" + req.body);
 
     TransactionService.createTransaction(req.body)
         .then(transaction => {

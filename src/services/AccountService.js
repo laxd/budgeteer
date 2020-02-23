@@ -6,20 +6,20 @@ const logger = require('../loaders/logger');
 class AccountService {
 
     createAccount(account) {
-        logger.silly("Creating account: ", account);
-        return Account.build({
+        logger.silly("Creating account: " + account.name);
+        return Account.create({
             name: account.name,
             BudgetId: account.budgetId,
             Transactions: [{
                 vendor: "Self",
-                amount: account.startingBalance,
+                amount: account.startingBalance || 0,
                 date: new Date()
             }]
         }, {
             include: [{
                 association: Transaction
             }]
-        }).save();
+        });
     }
 
     findAccount(id) {
