@@ -1,9 +1,26 @@
 module.exports = function(sequelize, DataTypes) {
-    return sequelize.define('Category', {
+    const Category = sequelize.define('Category', {
         id: {
-            type: DataTypes.STRING,
-            primaryKey: true
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
         },
-        name: DataTypes.STRING
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     });
+
+
+    Category.prototype.toJson = function() {
+        return {
+            id: this.id,
+            name: this.name,
+            links: {
+                self: `/categories/${this.id}`,
+            }
+        }
+    };
+
+    return Category;
 };

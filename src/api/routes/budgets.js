@@ -1,19 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const BudgetController = require('../controllers/BudgetController');
+const budgetController = require('../controllers/BudgetController');
 
-router.get("/", BudgetController.get_all_budgets);
+router.get("/", budgetController.get_all_budgets);
 
-router.get("/:id", BudgetController.get_budget);
+router.get("/:id", budgetController.get_budget);
 
 router.post("/",
-    BudgetController.validate(),
-    BudgetController.create_budget);
+    budgetController.validate(),
+    budgetController.create_budget);
 
 router.put("/:budgetId",
-    BudgetController.validate(),
-    BudgetController.update_budget);
+    budgetController.validate(),
+    budgetController.update_budget);
 
-router.delete("/:id", BudgetController.delete_budget);
+router.delete("/:id", budgetController.delete_budget);
 
 module.exports = router;

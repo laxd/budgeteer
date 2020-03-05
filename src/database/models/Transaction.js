@@ -1,3 +1,5 @@
+const TransactionStatus = require('./TransactionStatus');
+
 module.exports = (sequelize, DataTypes) => {
     const Transaction = sequelize.define('Transaction', {
         id: {
@@ -7,44 +9,39 @@ module.exports = (sequelize, DataTypes) => {
         },
         vendor: {
             type: DataTypes.STRING,
-            nullable: false
+            allowNull: false
         },
         amount: {
             type: DataTypes.BIGINT,
-            nullable: false
+            allowNull: false
         },
         date: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: sequelize.NOW
+            defaultValue: DataTypes.NOW
         },
-        cleared: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
-        reconciled: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
+        status: {
+            type: DataTypes.ENUM,
+            values: [TransactionStatus.PENDING, TransactionStatus.CLEARED, TransactionStatus.RECONCILED],
+            defaultValue: TransactionStatus.PENDING
         }
     });
 
     Transaction.associate = function(models) {
-        Transaction.belongsTo(models.Account);
+        Transaction.Account = Transaction.belongsTo(models.Account);
     };
 
-    Transaction.toJson = (transaction, accountId) => {
+    Transaction.prototype.toJson = function() {
+        console.log(this);
         return {
-            id: transaction.id,
-            vendor: transaction.vendor,
-            date: transaction.date,
-            amount: transaction.amount,
-            cleared: transaction.cleared,
-            reconciled: transaction.reconciled,
+            id: this.id,
+            vendor: this.vendor,
+            date: this.date,
+            amount: this.amount,
+            status: this.status,
             links: {
-                self: `/transactions/${transaction.id}`,
-                account: `/accounts/${accountId}`
+                self: `/transactions/${this.id}`,
+                account: `/accounts/${this.Account.id}`
             }
         }
     };

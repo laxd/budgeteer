@@ -1,6 +1,5 @@
 const { check, validationResult } = require('express-validator');
-const { Account, Budget } = require('../../database/models/index');
-const AccountService = require('../../services/AccountService');
+const accountService = require('../../services/AccountService');
 const BudgetService = require('../../services/BudgetService');
 const logger = require('../../loaders/logger');
 
@@ -21,29 +20,26 @@ exports.validate = () => {
     ]
 };
 
-exports.get_all_accounts = (req, res, next) => {
-    AccountService.findAccountsForBudget(req.query.budgetId)
-        .then(accounts => {
-            res.status(200)
-                .json(accounts.map(account => Account.toJson(account)));
-        }).catch(error => next(error))
+exports.get_all_accounts = async (req, res) => {
+    const accounts = await accountService.findAccountsForBudget(req.query.budgetId);
+
+    res.status(200)
+        .json(accounts.map(account => account.toJson()));
 };
 
-exports.get_account = (req, res, next) => {
-    AccountService.findAccount(req.params.id)
-        .then((account) => {
-            if(account) {
-                res.status(200).json(Account.toJson(account));
-            }
-            else {
-                res.status(404).json({
-                    message: "Not found"
-                });
-            }
-        }).catch(error => next(error))
+exports.get_account = async (req, res) => {
+    const account = await accountService.findAccount(req.params.id);
+    if(account) {
+        res.status(200).json(account.toJson());
+    }
+    else {
+        res.status(404).json({
+            message: "Not found"
+        });
+    }
 };
 
-exports.create_account = (req, res, next) => {
+exports.create_account = async (req, res) => {
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {
@@ -51,19 +47,17 @@ exports.create_account = (req, res, next) => {
             .json({ errors: errors.array() });
     }
 
-    AccountService.createAccount(req.body)
-        .then(account => {
-            res.status(200)
-                .json(Account.toJson(account));
-        }).catch(error => next(error))
+    const account = await accountService.createAccount(req.body);
+
+    res.status(200)
+        .json(account.toJson());
 };
 
-exports.delete_account = (req, res, next) => {
-    AccountService.deleteAccount(req.params.id)
-        .then(() => {
-            res.status(200).json({
-                status: "Success",
-                message: "Account deleted"
-            });
-        }).catch(error => next(error))
+exports.delete_account = async (req, res) => {
+    await accountService.deleteAccount(req.params.id);
+
+    res.status(200).json({
+        status: "Success",
+        message: "Account deleted"
+    });
 };

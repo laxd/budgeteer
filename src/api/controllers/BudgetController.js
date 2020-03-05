@@ -1,6 +1,5 @@
 const {check, validationResult} = require('express-validator');
-const {Budget} = require('../../database/models/index');
-const BudgetService = require('../../services/BudgetService');
+const budgetService = require('../../services/BudgetService');
 
 exports.validate = () => {
     return [
@@ -9,18 +8,18 @@ exports.validate = () => {
 };
 
 exports.get_all_budgets = (req, res) => {
-    BudgetService.findAll()
+    budgetService.findAll()
         .then(budgets => {
             res.status(200)
-                .json(budgets.map(budget => Budget.toJson(budget)));
+                .json(budgets.map(budget => budget.toJson()));
         }).catch(error => next(error));
 };
 
 exports.get_budget = (req, res) => {
-    BudgetService.findBudget(req.param.id)
+    budgetService.findBudget(req.param.id)
         .then(budget => {
             res.status(200)
-                .json(Budget.toJson(budget))
+                .json(budget.toJson())
         }).catch(error => next(error));
 };
 
@@ -32,23 +31,23 @@ exports.create_budget = (req, res) => {
             .json({errors: errors.array()});
     }
 
-    BudgetService.createBudget(req.body.name)
+    budgetService.createBudget(req.body.name)
         .then(budget => {
             res.status(200)
-                .json(Budget.toJson(budget));
+                .json(budget.toJson());
         }).catch(error => next(error));
 };
 
 exports.update_budget = (req, res) => {
-    BudgetService.updateBudget(req.params.id)
+    budgetService.updateBudget(req.params.id)
         .then(budget => {
             res.status(200)
-                .json(Budget.toJson(budget));
+                .json(budget.toJson());
         }).catch(error => next(error));
 };
 
 exports.delete_budget = (req, res) => {
-    BudgetService.deleteBudget(req.params.id)
+    budgetService.deleteBudget(req.params.id)
         .then(() => {
             res.status(200)
                 .json({message: "Budget deleted"});

@@ -1,37 +1,35 @@
-const {Transaction} = require('../database/models');
+const {Transaction, Status, Account} = require('../database/models');
 const AccountService = require('./AccountService');
 const createError = require('http-errors');
 
-class TransactionService {
+module.exports = {
 
-    findTransactions(accountId) {
+    findTransactions: (accountId) => {
         return Transaction.findAll({
             where: {
                 accountId: accountId
-            }
+            },
+            include: Account
         });
-    }
+    },
 
-    createTransaction(transaction) {
-        console.log(transaction);
-        return AccountService.findAccount(transaction.accountId)
-            .then((account) => {
-                if (account) {
-                    console.log(account);
-                    return Transaction.build({
-                        vendor: transaction.vendor,
-                        amount: transaction.amount,
-                        date: transaction.date,
-                        AccountId: transaction.accountId
-                    }).save();
-                }
-                else {
-                    throw createError(404, "Account does not exist");
-                }
-            });
-    }
+    createTransaction: async (transaction) => {
+        const account = await AccountService.findAccount(transaction.accountId);
 
-    updateTransaction(id, values) {
+        if(!account) {
+            throw createError(404, "Account does not exist");
+        }
+
+        return Transaction.build({
+            vendor: transaction.vendor,
+            amount: transaction.amount,
+            date: transaction.date,
+            status: Transaction.Status.PENDING,
+            AccountId: transaction.accountId
+        }).save();
+    },
+
+    updateTransaction: (id, values) => {
         return Transaction.findOne({
             where: {
                 id: id
@@ -46,9 +44,9 @@ class TransactionService {
 
             return result.save();
         });
-    }
+    },
 
-    deleteTransaction(id) {
+    deleteTransaction: (id) => {
         return Transaction.findOne({
             where: {
                 id: id
@@ -59,7 +57,4 @@ class TransactionService {
             }
         });
     }
-
 }
-
-module.exports = new TransactionService();

@@ -5,20 +5,23 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        name: DataTypes.STRING
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     });
 
     Budget.associate = (models) => {
         Budget.hasMany(models.Account);
     };
 
-    Budget.toJson = (budget) => {
+    Budget.prototype.toJson = function() {
         return {
-            id: budget.id,
-            name: budget.name,
+            id: this.id,
+            name: this.name,
             links: {
-                self: `/budgets/${budget.id}`,
-                accounts: `/accounts?budgetId=${budget.id}`
+                self: `/budgets/${this.id}`,
+                accounts: `/accounts?budgetId=${this.id}`
             }
         }
     };

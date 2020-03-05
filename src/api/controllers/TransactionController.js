@@ -1,7 +1,6 @@
 const { check, query, validationResult } = require('express-validator');
-const { Transaction } = require('../../database/models/index');
-const TransactionService = require('../../services/TransactionService');
-const AccountService = require('../../services/AccountService');
+const transactionService = require('../../services/TransactionService');
+const accountService = require('../../services/AccountService');
 
 exports.validate = () => {
     return [
@@ -9,7 +8,7 @@ exports.validate = () => {
         check('amount').isNumeric(),
         check('date').isISO8601().toDate(),
         check('accountId', 'Account does not exist').custom(val => {
-            return AccountService.findAccount(val).then(account => {
+            return accountService.findAccount(val).then(account => {
                 console.log("Val: " + val + " account: " + account);
                 if(account === undefined) {
                     console.log("Account does not exist!");
@@ -26,7 +25,7 @@ exports.validateAccountIdPresent = () => {
     ]
 };
 
-exports.get_transactions = (req, res) => {
+exports.get_transactions = async (req, res) => {
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {
@@ -34,11 +33,10 @@ exports.get_transactions = (req, res) => {
             .json({ errors: errors.array() });
     }
 
-    TransactionService.findTransactions(req.query.accountId)
-        .then(transactions => {
-            res.status(200)
-                .json(transactions.map(transaction => Transaction.toJson(transaction)));
-        }).catch(error => next(error))
+    const transactions = await transactionService.findTransactions(req.query.accountId);
+
+    res.status(200)
+        .json(transactions.map(transaction => transaction.toJson()));
 };
 
 exports.add_transaction = (req, res, next) => {
@@ -52,25 +50,25 @@ exports.add_transaction = (req, res, next) => {
 
     console.log("Validation passed:" + req.body);
 
-    TransactionService.createTransaction(req.body)
+    transactionService.createTransaction(req.body)
         .then(transaction => {
             res.status(200)
-                .json(Transaction.toJson(transaction));
+                .json(transaction.toJson());
         }).catch(error => next(error))
 };
 
-exports.update_transaction = (req, res) => {
+exports.update_transaction = (req, res, next) => {
     // Find the given transaction first
-    TransactionService.updateTransaction(req.params.id, req.body)
+    transactionService.updateTransaction(req.params.id, req.body)
         .then(transaction => {
             res.status(200)
-                .json(Transaction.toJson(transaction));
+                .json(transaction.toJson());
         }).catch(error => next(error))
 };
 
 
-exports.delete_transaction = (req, res) => {
-    TransactionService.deleteTransaction(req.params.id)
+exports.delete_transaction = (req, res, next) => {
+    transactionService.deleteTransaction(req.params.id)
         .then(() => {
             res.status(200)
                 .json({ message: "Transaction deleted" });

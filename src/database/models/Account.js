@@ -5,23 +5,25 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        name: DataTypes.STRING,
-        balance: DataTypes.VIRTUAL
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     });
 
     Account.associate = function(models) {
-        Account.hasMany(models.Transaction);
-        Account.belongsTo(models.Budget);
+        Account.Transactions = Account.hasMany(models.Transaction);
+        Account.Budget = Account.belongsTo(models.Budget);
     };
 
-    Account.toJson = (account) => {
+    Account.prototype.toJson = function() {
         return {
-            id: account.id,
-            name: account.name,
-            balance: account.balance,
+            id: this.id,
+            name: this.name,
+            balance: this.balance,
             links: {
-                self: `/accounts/${account.id}`,
-                transactions: `/transactions?accountId=${account.id}`
+                self: `/accounts/${this.id}`,
+                transactions: `/transactions?accountId=${this.id}`
             }
         }
     };

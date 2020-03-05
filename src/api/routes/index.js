@@ -4,6 +4,7 @@ const router = express.Router();
 const routes = [
     'accounts',
     'budgets',
+    'categories',
     'transactions'
 ];
 

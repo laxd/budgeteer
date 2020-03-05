@@ -1,11 +1,9 @@
-const createError = require('http-errors');
 const {sequelize} = require('../database/models');
 const {Account, Transaction} = require('../database/models');
 const logger = require('../loaders/logger');
 
-class AccountService {
-
-    createAccount(account) {
+module.exports = {
+    createAccount: (account) => {
         logger.silly("Creating account: " + account.name);
         return Account.create({
             name: account.name,
@@ -17,39 +15,30 @@ class AccountService {
             }]
         }, {
             include: [{
-                association: Transaction
+                association: Account.Transactions
             }]
         });
-    }
+    },
 
-    findAccount(id) {
+    findAccount: (id) => {
         logger.silly("Finding account: ", id);
-        return Promise.all([
-            Account.findOne({
-                where: {
-                    id: id
-                }
-            }),
-            this.getCurrentBalance(id)
-        ]).then(([account, balance]) => {
-            if (account) {
-                // TODO: Find a way to incorporate this into the account model
-                account.balance = balance;
+        return Account.findOne({
+            where: {
+                id: id
             }
-            return account;
-        })
-    }
+        });
+    },
 
-    findAccountsForBudget(id) {
+    findAccountsForBudget: (id) => {
         return Account.findAll({
                 where: {
-                    id: id
+                    BudgetId: id
                 }
             }
         );
-    }
+    },
 
-    deleteAccount(id) {
+    deleteAccount: (id) => {
         logger.silly("Deleting account: ", id);
         return Account.findOne({
             where: {
@@ -61,9 +50,9 @@ class AccountService {
                     account.destroy();
                 }
             });
-    }
+    },
 
-    getCurrentBalance(accountId) {
+    getCurrentBalance: (accountId) => {
         return Transaction.findAll({
             attributes: [[sequelize.fn('sum', sequelize.col('amount')), 'transactionSum']],
             where: {
@@ -74,7 +63,4 @@ class AccountService {
             return result[0].transactionSum;
         });
     }
-
-}
-
-module.exports = new AccountService();
+};

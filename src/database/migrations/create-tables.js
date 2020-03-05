@@ -6,7 +6,10 @@ const createBudget = (queryInterface, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        name: DataTypes.STRING
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     });
 };
 
@@ -14,9 +17,13 @@ const createCategory = (queryInterface, DataTypes) => {
     return queryInterface.createTable('Category', {
         id: {
             type: DataTypes.STRING,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
-        name: DataTypes.STRING
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     });
 };
 
@@ -27,22 +34,13 @@ const createAccount = (queryInterface, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
-        name: DataTypes.STRING,
-        startingBalance: {
-            type: DataTypes.NUMERIC(10, 2),
+        name: {
+            type: DataTypes.STRING,
             allowNull: false
         },
         budgetId: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: 'Budget',
-                key: 'id'
-            }
-        },
-        categoryId: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
             references: {
                 model: 'Budget',
                 key: 'id'
@@ -60,25 +58,20 @@ const createTransaction = (queryInterface, DataTypes) => {
         },
         vendor: {
             type: DataTypes.STRING,
-            nullable: false
+            allowNull: false
         },
         amount: {
             type: DataTypes.BIGINT,
-            nullable: false
+            allowNull: false
         },
         date: {
             type: DataTypes.DATE,
             allowNull: false,
             defaultValue: DataTypes.NOW
         },
-        cleared: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
-        reconciled: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
+        status: {
+            type: DataTypes.ENUM,
+            values: ["pending", "cleared", "reconciled"],
             defaultValue: false
         },
         accountId: {
@@ -93,10 +86,12 @@ const createTransaction = (queryInterface, DataTypes) => {
 
 module.exports = {
     up: (queryInterface, DataTypes) => {
-        return createBudget(queryInterface, DataTypes)
-            .then(createCategory(queryInterface, DataTypes)
-                .then(createAccount(queryInterface, DataTypes)
-                    .then(createTransaction(queryInterface, DataTypes))));
+        return Promise.all([
+            createBudget(queryInterface, DataTypes),
+            createCategory(queryInterface, DataTypes),
+            createAccount(queryInterface, DataTypes),
+            createTransaction(queryInterface, DataTypes)
+        ])
     },
 
     down: (queryInterface, Sequelize) => {

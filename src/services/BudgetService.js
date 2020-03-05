@@ -1,33 +1,33 @@
-const { Budget } = require('../database/models');
+const {Budget} = require('../database/models');
 const createError = require('http-errors');
 
-class BudgetService {
+module.exports = {
 
-    findBudget(id) {
+    findBudget: (id) => {
         return Budget.findOne({
             where: {
                 id: id
             }
         }).then((budget) => {
-            if(!budget) {
+            if (!budget) {
                 throw createError(404, "Budget not found");
             }
 
             return budget;
         })
-    }
+    },
 
-    findAll() {
+    findAll: () => {
         return Budget.findAll();
-    }
+    },
 
-    createBudget(name) {
+    createBudget: (name) => {
         return Budget.create({
             name: name
         });
-    }
+    },
 
-    updateBudget(id, values) {
+    updateBudget: (id, values) => {
         return this.findBudget(id)
             .then(result => {
                 // Only update the values that have actually changed and actually exist
@@ -39,9 +39,9 @@ class BudgetService {
 
                 result.save();
             });
-    }
+    },
 
-    deleteBudget(id) {
+    deleteBudget: (id) => {
         Budget.findOne({
             where: {
                 id: id
@@ -55,6 +55,4 @@ class BudgetService {
             }
         });
     }
-}
-
-module.exports = new BudgetService();
+};
