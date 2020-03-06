@@ -1,4 +1,4 @@
-const {Transaction, Account} = require('../database/models');
+const {Transaction, Account, Category} = require('../database/models');
 const TransactionStatus = require('../database/models/TransactionStatus');
 const AccountService = require('./AccountService');
 const createError = require('http-errors');
@@ -10,7 +10,11 @@ module.exports = {
             where: {
                 accountId: accountId
             },
-            include: Account
+            include: [{
+                model: Account
+            }, {
+                model: Category
+            }]
         });
     },
 
@@ -26,7 +30,8 @@ module.exports = {
             amount: transaction.amount,
             date: transaction.date,
             status: transaction.status,
-            AccountId: transaction.accountId
+            AccountId: transaction.accountId,
+            CategoryId: transaction.categoryId
         }).save();
     },
 

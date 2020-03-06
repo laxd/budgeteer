@@ -59,7 +59,6 @@ exports.add_transaction = (req, res, next) => {
 };
 
 exports.update_transaction = (req, res, next) => {
-    // Find the given transaction first
     transactionService.updateTransaction(req.params.id, req.body)
         .then(transaction => {
             res.status(200)

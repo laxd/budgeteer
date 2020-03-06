@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Transaction.associate = function(models) {
         Transaction.Account = Transaction.belongsTo(models.Account);
+        Transaction.Category = Transaction.belongsTo(models.Category);
     };
 
     Transaction.prototype.toJson = function() {
@@ -39,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
             date: this.date,
             amount: this.amount,
             status: this.status,
+            category: this.Category ? this.Category.toJson() : "None",
             links: {
                 self: `/transactions/${this.id}`,
                 account: `/accounts/${this.AccountId}`

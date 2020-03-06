@@ -11,6 +11,9 @@ module.exports = function(sequelize, DataTypes) {
         }
     });
 
+    Category.associate = function(models) {
+        Category.Transactions = Category.hasMany(models.Transaction)
+    };
 
     Category.prototype.toJson = function() {
         return {
