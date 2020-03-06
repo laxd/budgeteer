@@ -21,7 +21,7 @@ module.exports = {
     },
 
     findAccount: (id) => {
-        logger.silly("Finding account: ", id);
+        logger.silly("Finding account: " + id);
         return Account.findOne({
             where: {
                 id: id

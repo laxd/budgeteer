@@ -1,4 +1,4 @@
-exports.default = TransactionStatus = {
+module.exports = TransactionStatus = {
     PENDING: "pending",
     CLEARED: "cleared",
     RECONCILED: "reconciled"

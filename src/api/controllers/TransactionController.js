@@ -1,4 +1,5 @@
-const { check, query, validationResult } = require('express-validator');
+const { check, body, validationResult } = require('express-validator');
+const TransactionStatus = require('../../database/models/TransactionStatus');
 const transactionService = require('../../services/TransactionService');
 const accountService = require('../../services/AccountService');
 
@@ -7,21 +8,24 @@ exports.validate = () => {
         check('vendor').not().isEmpty(),
         check('amount').isNumeric(),
         check('date').isISO8601().toDate(),
-        check('accountId', 'Account does not exist').custom(val => {
-            return accountService.findAccount(val).then(account => {
-                console.log("Val: " + val + " account: " + account);
-                if(account === undefined) {
-                    console.log("Account does not exist!");
-                    return Promise.reject();
-                }
-            });
+        body('accountId', 'Account does not exist').custom(async val => {
+            return await accountService.findAccount(val);
+        }),
+        body('status', 'Invalid status').custom(val => {
+            console.log(Object.values(TransactionStatus));
+
+            if(val && !Object.values(TransactionStatus).includes(val)) {
+                return Promise.reject();
+            }
+
+            return Promise.resolve();
         })
     ]
 };
 
 exports.validateAccountIdPresent = () => {
     return [
-        query('accountId').not().isEmpty()
+        check('accountId').not().isEmpty()
     ]
 };
 
@@ -40,15 +44,12 @@ exports.get_transactions = async (req, res) => {
 };
 
 exports.add_transaction = (req, res, next) => {
-    console.log("Adding transaction:" + req.body);
     const errors = validationResult(req);
 
     if(!errors.isEmpty()) {
         return res.status(422)
             .json({ errors: errors.array() });
     }
-
-    console.log("Validation passed:" + req.body);
 
     transactionService.createTransaction(req.body)
         .then(transaction => {

@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
             status: this.status,
             links: {
                 self: `/transactions/${this.id}`,
-                account: `/accounts/${this.Account.id}`
+                account: `/accounts/${this.AccountId}`
             }
         }
     };

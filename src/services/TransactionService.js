@@ -1,4 +1,5 @@
-const {Transaction, Status, Account} = require('../database/models');
+const {Transaction, Account} = require('../database/models');
+const TransactionStatus = require('../database/models/TransactionStatus');
 const AccountService = require('./AccountService');
 const createError = require('http-errors');
 
@@ -24,7 +25,7 @@ module.exports = {
             vendor: transaction.vendor,
             amount: transaction.amount,
             date: transaction.date,
-            status: Transaction.Status.PENDING,
+            status: transaction.status,
             AccountId: transaction.accountId
         }).save();
     },
