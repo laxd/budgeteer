@@ -7,7 +7,7 @@ exports.validate = () => {
     return [
         check('vendor').not().isEmpty(),
         check('amount').isNumeric(),
-        check('date').isISO8601().toDate(),
+        check('date').isNumeric(),
         body('accountId', 'Account does not exist').custom(async val => {
             return await accountService.findAccount(val);
         }),

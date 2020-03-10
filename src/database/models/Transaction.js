@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
         return {
             id: this.id,
             vendor: this.vendor,
-            date: this.date,
+            date: Math.round(this.date.getTime()/1000),
             amount: this.amount,
             status: this.status,
             category: this.Category ? this.Category.toJson() : "None",
